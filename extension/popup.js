@@ -149,12 +149,22 @@ async function showClipView() {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
-    const results = await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      files: ["extract.js"],
-    });
+    const isXTwitter = /^https?:\/\/(x\.com|twitter\.com)\//i.test(tab.url);
+    const maxAttempts = isXTwitter ? 10 : 1;
+    let data = null;
 
-    const data = results[0]?.result;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      if (attempt > 0) await new Promise((r) => setTimeout(r, 300));
+
+      const results = await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ["extract.js"],
+      });
+
+      data = results[0]?.result;
+      if (data?.content) break;
+    }
+
     if (!data) throw new Error("Could not extract page content");
 
     clipTitle.value = data.title || "";

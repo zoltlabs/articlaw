@@ -7,6 +7,7 @@ import { useState, Suspense } from "react";
 function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -21,6 +22,11 @@ function LoginForm() {
     setMessage("");
 
     if (isSignUp) {
+      if (inviteCode !== "engineerscodex") {
+        setMessage("Invalid invite code.");
+        setLoading(false);
+        return;
+      }
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -100,6 +106,25 @@ function LoginForm() {
             className="w-full rounded-md border border-neutral-300 bg-transparent px-3 py-2 text-sm focus:border-neutral-500 focus:outline-none dark:border-neutral-700 dark:focus:border-neutral-500"
           />
         </div>
+        {isSignUp && (
+          <div>
+            <label
+              htmlFor="invite-code"
+              className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+            >
+              Invite Code
+            </label>
+            <input
+              id="invite-code"
+              type="password"
+              value={inviteCode}
+              onChange={(e) => setInviteCode(e.target.value)}
+              placeholder="Invite code"
+              required
+              className="w-full rounded-md border border-neutral-300 bg-transparent px-3 py-2 text-sm focus:border-neutral-500 focus:outline-none dark:border-neutral-700 dark:focus:border-neutral-500"
+            />
+          </div>
+        )}
         <button
           type="submit"
           disabled={loading}
@@ -122,18 +147,6 @@ function LoginForm() {
         {isSignUp ? "Already have an account? Log in" : "Don't have an account? Sign up"}
       </button>
 
-      <div className="my-6 flex items-center gap-3">
-        <div className="h-px flex-1 bg-neutral-200 dark:bg-neutral-800" />
-        <span className="text-xs text-neutral-500">or</span>
-        <div className="h-px flex-1 bg-neutral-200 dark:bg-neutral-800" />
-      </div>
-
-      <button
-        onClick={handleGoogle}
-        className="w-full rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
-      >
-        Continue with Google
-      </button>
     </div>
   );
 }

@@ -26,12 +26,52 @@
     const handle = pathParts[0] || "";
     const author = `@${handle} on X`;
 
-    // Grab the main tweet and any thread replies by the same user
+    // ── Check for Twitter Article (long-form) first ──
+    const articleView = document.querySelector('[data-testid="twitterArticleReadView"]');
+    if (articleView) {
+      const articleTitle =
+        articleView.querySelector('[data-testid="twitter-article-title"]')?.textContent?.trim() || "";
+      const articleBody = articleView.querySelector('[data-testid="twitterArticleRichTextView"]');
+      let articleContent = "";
+      if (articleBody) {
+        // Extract text blocks from DraftJS editor, preserving bold and paragraphs
+        const blocks = articleBody.querySelectorAll('[data-block="true"]');
+        const parts = [];
+        for (const block of blocks) {
+          // Separators become <hr>
+          if (block.querySelector('[role="separator"]')) {
+            parts.push("<hr>");
+            continue;
+          }
+          const bold = block.querySelector('span[style*="font-weight: bold"]');
+          const text = block.textContent?.trim();
+          if (!text) continue;
+          if (bold) {
+            parts.push(`<h3>${text}</h3>`);
+          } else {
+            parts.push(`<p>${text}</p>`);
+          }
+        }
+        articleContent = parts.join("\n");
+      }
+
+      let title = articleTitle;
+      if (!title) {
+        title = document.title
+          .replace(/\s*\/\s*X\s*$/, "")
+          .replace(/^.*?\bon X:\s*/, "")
+          .replace(/^"|"$/g, "")
+          .trim();
+      }
+
+      return { title, author, source_url: url, content: articleContent };
+    }
+
+    // ── Regular tweet / thread ──
     const tweetArticles = document.querySelectorAll('article[data-testid="tweet"]');
     const tweets = [];
 
     for (const article of tweetArticles) {
-      // Check if this tweet is from the thread author
       const userLinks = article.querySelectorAll('a[role="link"]');
       let isAuthor = false;
       for (const link of userLinks) {
@@ -42,21 +82,47 @@
       }
       if (!isAuthor && tweets.length > 0) continue;
 
-      const tweetText = article.querySelector('[data-testid="tweetText"]');
+      const tweetText =
+        article.querySelector('[data-testid="tweetText"]') ||
+        article.querySelector('div[lang]');
       if (tweetText) {
         tweets.push(tweetText.innerHTML);
       }
     }
 
-    // Get the title from the first tweet text
     const firstTweetText = tweets[0]
       ? new DOMParser().parseFromString(tweets[0], "text/html").body.textContent?.slice(0, 80) || ""
       : "";
-    const title = firstTweetText
+    let title = firstTweetText
       ? `${firstTweetText}${firstTweetText.length >= 80 ? "..." : ""}`
-      : `Thread by @${handle}`;
+      : "";
+    let content = tweets.map((t) => `<div class="tweet">${t}</div>`).join("<hr>");
 
-    const content = tweets.map((t) => `<div class="tweet">${t}</div>`).join("<hr>");
+    // Fall back to meta tags / document.title when DOM scraping yields nothing
+    if (!title) {
+      const ogTitle = meta("property", "og:title");
+      if (ogTitle) {
+        title = ogTitle;
+      } else if (document.title) {
+        title = document.title;
+      } else {
+        title = `Thread by @${handle}`;
+      }
+    }
+
+    // Clean X/Twitter title cruft
+    title = title
+      .replace(/\s*\/\s*X\s*$/, "")
+      .replace(/^.*?\bon X:\s*/, "")
+      .replace(/^"|"$/g, "")
+      .trim();
+
+    if (!content) {
+      const ogDesc = meta("property", "og:description");
+      if (ogDesc) {
+        content = `<p>${ogDesc}</p>`;
+      }
+    }
 
     return { title, author, source_url: url, content };
   }
