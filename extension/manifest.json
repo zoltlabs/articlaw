@@ -3,7 +3,7 @@
   "name": "Clip to Articlaw",
   "version": "1.0.0",
   "description": "One-click article clipping to Articlaw",
-  "permissions": ["activeTab", "storage", "scripting"],
+  "permissions": ["activeTab", "storage", "scripting", "identity"],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {

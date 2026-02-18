@@ -12,6 +12,7 @@ const logoutBtn = document.getElementById("logout-btn");
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
 const loginBtn = document.getElementById("login-btn");
+const googleBtn = document.getElementById("google-btn");
 const loginStatus = document.getElementById("login-status");
 
 const clipTitle = document.getElementById("clip-title");
@@ -79,6 +80,50 @@ loginBtn.addEventListener("click", async () => {
 // Allow Enter to submit login
 passwordInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") loginBtn.click();
+});
+
+// ── Google OAuth ────────────────────────────────────────────
+googleBtn.addEventListener("click", async () => {
+  googleBtn.disabled = true;
+  loginStatus.textContent = "Opening Google sign-in...";
+  loginStatus.className = "status";
+
+  try {
+    const redirectUrl = chrome.identity.getRedirectURL();
+
+    // Build Supabase OAuth URL — redirect back to extension
+    const authUrl = new URL(`${SUPABASE_URL}/auth/v1/authorize`);
+    authUrl.searchParams.set("provider", "google");
+    authUrl.searchParams.set("redirect_to", redirectUrl);
+
+    const responseUrl = await chrome.identity.launchWebAuthFlow({
+      url: authUrl.toString(),
+      interactive: true,
+    });
+
+    // Supabase returns tokens in the URL fragment: #access_token=...&refresh_token=...
+    const hash = new URL(responseUrl).hash.substring(1);
+    const params = new URLSearchParams(hash);
+
+    const accessToken = params.get("access_token");
+    const refreshToken = params.get("refresh_token");
+    const expiresIn = parseInt(params.get("expires_in") || "3600");
+
+    if (!accessToken) throw new Error("No access token received");
+
+    session = {
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      expires_at: Math.floor(Date.now() / 1000) + expiresIn,
+    };
+
+    await chrome.storage.local.set({ session });
+    showClipView();
+  } catch (err) {
+    loginStatus.textContent = err.message;
+    loginStatus.className = "status error";
+    googleBtn.disabled = false;
+  }
 });
 
 // ── Logout ─────────────────────────────────────────────────
