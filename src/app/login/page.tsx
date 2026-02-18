@@ -6,29 +6,46 @@ import { useState, Suspense } from "react";
 
 function LoginForm() {
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/";
   const supabase = createClient();
 
-  const handleMagicLink = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}${redirect}`,
-      },
-    });
-
-    if (error) {
-      setMessage(error.message);
+    if (isSignUp) {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}${redirect}`,
+        },
+      });
+      if (error) {
+        setMessage(error.message);
+      } else {
+        setMessage("Check your email to confirm your account!");
+      }
     } else {
-      setMessage("Check your email for a login link!");
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) {
+        setMessage(error.message);
+      } else {
+        router.push(redirect);
+        return;
+      }
     }
+
     setLoading(false);
   };
 
@@ -44,10 +61,10 @@ function LoginForm() {
   return (
     <div className="mx-auto max-w-sm px-4 py-16">
       <h1 className="mb-8 text-center font-serif text-2xl font-bold text-neutral-900 dark:text-neutral-100">
-        Log in to Articlaw
+        {isSignUp ? "Sign up for Articlaw" : "Log in to Articlaw"}
       </h1>
 
-      <form onSubmit={handleMagicLink} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label
             htmlFor="email"
@@ -65,12 +82,30 @@ function LoginForm() {
             className="w-full rounded-md border border-neutral-300 bg-transparent px-3 py-2 text-sm focus:border-neutral-500 focus:outline-none dark:border-neutral-700 dark:focus:border-neutral-500"
           />
         </div>
+        <div>
+          <label
+            htmlFor="password"
+            className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+          >
+            Password
+          </label>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            required
+            minLength={6}
+            className="w-full rounded-md border border-neutral-300 bg-transparent px-3 py-2 text-sm focus:border-neutral-500 focus:outline-none dark:border-neutral-700 dark:focus:border-neutral-500"
+          />
+        </div>
         <button
           type="submit"
           disabled={loading}
           className="w-full rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700 disabled:opacity-50 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-300"
         >
-          {loading ? "Sending..." : "Send Magic Link"}
+          {loading ? "Loading..." : isSignUp ? "Sign Up" : "Log In"}
         </button>
       </form>
 
@@ -79,6 +114,13 @@ function LoginForm() {
           {message}
         </p>
       )}
+
+      <button
+        onClick={() => { setIsSignUp(!isSignUp); setMessage(""); }}
+        className="mt-3 w-full text-center text-sm text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+      >
+        {isSignUp ? "Already have an account? Log in" : "Don't have an account? Sign up"}
+      </button>
 
       <div className="my-6 flex items-center gap-3">
         <div className="h-px flex-1 bg-neutral-200 dark:bg-neutral-800" />
