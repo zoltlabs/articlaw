@@ -17,7 +17,15 @@ export default function ArticleCard({ article }: { article: Article }) {
           {article.title}
         </h2>
         <div className="mt-1 flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
-          {article.author && <span>{article.author}</span>}
+          {article.author && (
+            <Link
+              href={`/author/${encodeURIComponent(article.author)}`}
+              className="hover:text-neutral-900 hover:underline dark:hover:text-neutral-200"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {article.author}
+            </Link>
+          )}
           {article.author && <span>&middot;</span>}
           <time>{formatDate(article.created_at)}</time>
         </div>

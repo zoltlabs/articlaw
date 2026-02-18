@@ -38,9 +38,12 @@ export default function ArticleView({
         </h1>
         <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-neutral-500 dark:text-neutral-400">
           {article.author && (
-            <span className="font-medium text-neutral-700 dark:text-neutral-300">
+            <a
+              href={`/author/${encodeURIComponent(article.author)}`}
+              className="font-medium text-neutral-700 hover:text-neutral-900 hover:underline dark:text-neutral-300 dark:hover:text-neutral-100"
+            >
               {article.author}
-            </span>
+            </a>
           )}
           <time>{formatDate(article.created_at)}</time>
           {article.source_url && (

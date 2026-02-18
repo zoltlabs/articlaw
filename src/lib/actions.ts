@@ -93,6 +93,10 @@ export async function deleteArticle(id: string) {
 }
 
 export async function inferAuthor(url: string): Promise<string | null> {
+  // Extract author from URL patterns before attempting a fetch
+  const fromUrl = inferAuthorFromUrl(url);
+  if (fromUrl) return fromUrl;
+
   try {
     const res = await fetch(url, {
       headers: { "User-Agent": "Articlaw/1.0" },
@@ -123,6 +127,43 @@ export async function inferAuthor(url: string): Promise<string | null> {
       /<meta[^>]*property=["']article:author["'][^>]*content=["']([^"']+)["']/i
     )?.[1];
     if (articleAuthor) return articleAuthor;
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function inferAuthorFromUrl(url: string): string | null {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.replace("www.", "");
+    const path = u.pathname.split("/").filter(Boolean);
+
+    // Twitter / X: x.com/{user}/status/... or twitter.com/{user}/status/...
+    if ((host === "x.com" || host === "twitter.com") && path.length >= 1) {
+      return `@${path[0]} on X`;
+    }
+
+    // Substack: {author}.substack.com
+    if (host.endsWith(".substack.com")) {
+      return host.replace(".substack.com", "");
+    }
+
+    // Medium: medium.com/@{user}/...
+    if (host === "medium.com" && path[0]?.startsWith("@")) {
+      return path[0];
+    }
+
+    // GitHub: github.com/{user}/...
+    if (host === "github.com" && path.length >= 1) {
+      return path[0];
+    }
+
+    // YouTube: youtube.com/@{channel}
+    if ((host === "youtube.com" || host === "m.youtube.com") && path[0]?.startsWith("@")) {
+      return path[0];
+    }
 
     return null;
   } catch {
