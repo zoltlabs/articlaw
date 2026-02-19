@@ -17,7 +17,10 @@
     if (!el) return "";
     const clone = el.cloneNode(true);
     clone.querySelectorAll("script, style, nav, footer, header").forEach((e) => e.remove());
-    return clone.innerHTML;
+    // Convert standalone <br> sequences into paragraph breaks so newlines aren't lost
+    let html = clone.innerHTML;
+    html = html.replace(/(<br\s*\/?\s*>[\s\n]*){2,}/gi, "</p><p>");
+    return html;
   }
 
   // ── X / Twitter ──────────────────────────────────────────
@@ -44,12 +47,12 @@
             continue;
           }
           const bold = block.querySelector('span[style*="font-weight: bold"]');
-          const text = block.textContent?.trim();
-          if (!text) continue;
+          const html = block.innerHTML?.trim();
+          if (!html) continue;
           if (bold) {
-            parts.push(`<h3>${text}</h3>`);
+            parts.push(`<h3>${html}</h3>`);
           } else {
-            parts.push(`<p>${text}</p>`);
+            parts.push(`<p>${html}</p>`);
           }
         }
         articleContent = parts.join("\n");

@@ -172,10 +172,15 @@ async function showClipView() {
     clipUrl.value = data.source_url || tab.url;
     extractedContent = data.content || "";
 
-    // Show plain-text preview
+    // Show plain-text preview (innerText preserves line breaks from block elements)
     const tmp = document.createElement("div");
     tmp.innerHTML = extractedContent;
-    clipPreview.textContent = tmp.textContent.slice(0, 500) + (tmp.textContent.length > 500 ? "..." : "");
+    document.body.appendChild(tmp);
+    tmp.style.position = "absolute";
+    tmp.style.visibility = "hidden";
+    const plain = tmp.innerText;
+    tmp.remove();
+    clipPreview.textContent = plain.slice(0, 500) + (plain.length > 500 ? "..." : "");
 
     extractingView.style.display = "none";
     clipView.style.display = "block";
