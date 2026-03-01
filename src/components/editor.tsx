@@ -26,7 +26,7 @@ export default function Editor({
     extensions: [
       StarterKit,
       Link.configure({ openOnClick: false }),
-      Placeholder.configure({ placeholder: "Write your article..." }),
+      Placeholder.configure({ placeholder: "Write your snip..." }),
     ],
     content: initialContent || "",
     onUpdate: ({ editor }) => {
@@ -84,7 +84,7 @@ export default function Editor({
         <textarea
           value={markdown}
           onChange={(e) => handleMarkdownChange(e.target.value)}
-          placeholder="Write your article in markdown..."
+          placeholder="Write your snip in markdown..."
           className="w-full rounded-lg border border-neutral-300 bg-transparent px-4 py-3 font-mono text-sm leading-relaxed focus:border-neutral-500 focus:outline-none dark:border-neutral-700 dark:focus:border-neutral-500"
           rows={16}
         />

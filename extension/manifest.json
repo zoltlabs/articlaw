@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Clip to Snipclaw",
   "version": "1.0.0",
-  "description": "One-click article clipping to Snipclaw",
+  "description": "One-click web snipping with Snipclaw",
   "permissions": ["activeTab", "storage", "scripting", "identity"],
   "action": {
     "default_popup": "popup.html",

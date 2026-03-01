@@ -48,7 +48,7 @@ export default function NewArticlePage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       <h1 className="mb-6 font-serif text-2xl font-bold text-neutral-900 dark:text-neutral-100">
-        New Article
+        New Snip
       </h1>
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
@@ -64,7 +64,7 @@ export default function NewArticlePage() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
-            placeholder="Article title"
+            placeholder="Snip title"
             className="w-full rounded-md border border-neutral-300 bg-transparent px-3 py-2 text-sm focus:border-neutral-500 focus:outline-none dark:border-neutral-700 dark:focus:border-neutral-500"
           />
         </div>
@@ -116,7 +116,7 @@ export default function NewArticlePage() {
           disabled={submitting || !title.trim() || !content.trim()}
           className="rounded-md bg-neutral-900 px-5 py-2 text-sm font-medium text-white hover:bg-neutral-700 disabled:opacity-50 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-300"
         >
-          {submitting ? "Publishing..." : "Publish Article"}
+          {submitting ? "Publishing..." : "Publish Snip"}
         </button>
       </form>
     </div>

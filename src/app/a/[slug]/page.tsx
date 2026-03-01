@@ -18,7 +18,7 @@ export async function generateMetadata({
     .eq("slug", slug)
     .single();
 
-  if (!article) return { title: "Article Not Found" };
+  if (!article) return { title: "Snip Not Found" };
 
   return {
     title: `${article.title} - Snipclaw`,

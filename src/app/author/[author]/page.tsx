@@ -13,7 +13,7 @@ export async function generateMetadata({
   const decoded = decodeURIComponent(author);
   return {
     title: `${decoded} - Snipclaw`,
-    description: `Articles by ${decoded} on Snipclaw`,
+    description: `Snips by ${decoded} on Snipclaw`,
   };
 }
 
@@ -38,7 +38,7 @@ export default async function AuthorPage({
         {decoded}
       </h1>
       <p className="mb-6 text-sm text-neutral-500 dark:text-neutral-400">
-        {articles?.length ?? 0} article{articles?.length === 1 ? "" : "s"}
+        {articles?.length ?? 0} snip{articles?.length === 1 ? "" : "s"}
       </p>
       {articles && articles.length > 0 ? (
         <div className="space-y-4">
@@ -48,7 +48,7 @@ export default async function AuthorPage({
         </div>
       ) : (
         <p className="text-neutral-500 dark:text-neutral-400">
-          No articles found for this author.
+          No snips found for this author.
         </p>
       )}
     </div>

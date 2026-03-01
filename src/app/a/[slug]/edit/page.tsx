@@ -83,7 +83,7 @@ export default function EditArticlePage() {
 
   const handleDelete = async () => {
     if (!article) return;
-    if (!confirm("Are you sure you want to delete this article?")) return;
+    if (!confirm("Are you sure you want to delete this snip?")) return;
     setDeleting(true);
     await deleteArticle(article.id);
   };
@@ -102,7 +102,7 @@ export default function EditArticlePage() {
     <div className="mx-auto max-w-3xl px-4 py-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="font-serif text-2xl font-bold text-neutral-900 dark:text-neutral-100">
-          Edit Article
+          Edit Snip
         </h1>
         <button
           onClick={handleDelete}

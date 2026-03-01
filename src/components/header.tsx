@@ -44,7 +44,7 @@ export default function Header() {
                 href="/new"
                 className="rounded-md bg-neutral-900 px-3 py-1.5 text-white hover:bg-neutral-700 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-300"
               >
-                New Article
+                New Snip
               </Link>
               <button
                 onClick={handleLogout}

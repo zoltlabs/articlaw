@@ -224,10 +224,11 @@ export async function POST(request: Request) {
 
   const slug = generateSlug(title);
 
-  // Build styled tweet card HTML when tweet_meta is available
+  // Append styled tweet card(s) below the normal article content
   let finalContent = content;
   if (tweet_meta && Array.isArray(tweet_meta) && tweet_meta.length > 0) {
-    finalContent = tweet_meta.map((meta: TweetMeta) => buildTweetCard(meta, source_url)).join("");
+    const cards = tweet_meta.map((meta: TweetMeta) => buildTweetCard(meta, source_url)).join("");
+    finalContent = content + cards;
   }
 
   // Download images and rewrite URLs to Supabase Storage
