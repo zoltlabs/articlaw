@@ -114,25 +114,96 @@
     // ── Regular tweet / thread ──
     const tweetArticles = document.querySelectorAll('article[data-testid="tweet"]');
     const tweets = [];
+    const tweetMetas = [];
 
     for (const article of tweetArticles) {
       const userLinks = article.querySelectorAll('a[role="link"]');
       let isAuthor = false;
       for (const link of userLinks) {
-        if (link.href?.includes(`/${handle}`)) {
+        // Exact path segment match to avoid e.g. /dan matching /danfan
+        const linkPath = link.href ? new URL(link.href, location.origin).pathname : "";
+        if (linkPath === `/${handle}` || linkPath.startsWith(`/${handle}/`)) {
           isAuthor = true;
           break;
         }
       }
       if (!isAuthor && tweets.length > 0) break; // stop at first non-author tweet (not a thread)
 
+      // ── Extract structured metadata ──
+      const userNameEl = article.querySelector('[data-testid="User-Name"]');
+      let displayName = "";
+      let tweetHandle = handle;
+      if (userNameEl) {
+        // First text span contains the display name
+        const nameSpan = userNameEl.querySelector("span");
+        if (nameSpan) displayName = nameSpan.textContent?.trim() || "";
+        // Handle is in a span starting with @
+        const allSpans = userNameEl.querySelectorAll("span");
+        for (const s of allSpans) {
+          const text = s.textContent?.trim() || "";
+          if (text.startsWith("@")) {
+            tweetHandle = text.slice(1);
+            break;
+          }
+        }
+      }
+
+      // Avatar — profile image inside the tweet's user link area
+      let avatarUrl = "";
+      const avatarImg = article.querySelector('img[src*="profile_images"]');
+      if (avatarImg) avatarUrl = avatarImg.src;
+
+      // Timestamp
+      let timestamp = "";
+      const timeEl = article.querySelector("time[datetime]");
+      if (timeEl) timestamp = timeEl.getAttribute("datetime") || "";
+
+      const parts = [];
+
+      // 1. Tweet text
       const tweetText =
         article.querySelector('[data-testid="tweetText"]') ||
         article.querySelector('div[lang]');
       if (tweetText) {
-        // Convert literal newlines to <br> so they render in HTML
-        let html = tweetText.innerHTML.replace(/\n/g, "<br>");
-        tweets.push(html);
+        parts.push(tweetText.innerHTML.replace(/\n/g, "<br>"));
+      }
+
+      // 2. Images (excluding profile pics and tiny icons)
+      const tweetImages = [];
+      const images = article.querySelectorAll('[data-testid="tweetPhoto"] img');
+      for (const img of images) {
+        const src = img.src;
+        if (src && !src.includes("profile_images") && !src.includes("emoji")) {
+          parts.push(`<img src="${src}" alt="Tweet image" />`);
+          tweetImages.push(src);
+        }
+      }
+
+      // 3. Quote tweet (if present)
+      const quoteTweet =
+        article.querySelector('[data-testid="quoteTweet"]') ||
+        article.querySelector('div[tabindex="0"][role="link"]');
+      if (quoteTweet) {
+        const quoteText = quoteTweet.querySelector('[data-testid="tweetText"]');
+        const quoteAuthor = quoteTweet.querySelector('[data-testid="User-Name"]');
+        if (quoteText) {
+          const authorName = quoteAuthor?.textContent?.trim() || "Quoted tweet";
+          parts.push(
+            `<blockquote><p><strong>${authorName}</strong></p>${quoteText.innerHTML}</blockquote>`
+          );
+        }
+      }
+
+      if (parts.length > 0) {
+        tweets.push(parts.join("\n"));
+        tweetMetas.push({
+          display_name: displayName,
+          handle: tweetHandle,
+          avatar_url: avatarUrl,
+          timestamp,
+          images: tweetImages,
+          text_html: tweetText ? tweetText.innerHTML.replace(/\n/g, "<br>") : "",
+        });
       }
     }
 
@@ -170,7 +241,9 @@
       }
     }
 
-    return { title, author, source_url: url, content };
+    const result = { title, author, source_url: url, content };
+    if (tweetMetas.length > 0) result.tweet_meta = tweetMetas;
+    return result;
   }
 
   // ── Substack ─────────────────────────────────────────────

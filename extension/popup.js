@@ -26,6 +26,7 @@ const successLink = document.getElementById("success-link");
 const copyLinkBtn = document.getElementById("copy-link-btn");
 
 let extractedContent = "";
+let extractedTweetMeta = null;
 let session = null;
 
 // ── Init ───────────────────────────────────────────────────
@@ -172,6 +173,7 @@ async function showClipView() {
     clipAuthor.value = data.author || "";
     clipUrl.value = data.source_url || tab.url;
     extractedContent = data.content || "";
+    extractedTweetMeta = data.tweet_meta || null;
 
     // Show plain-text preview with line breaks preserved
     const plain = extractedContent
@@ -215,6 +217,7 @@ clipBtn.addEventListener("click", async () => {
         author: clipAuthor.value,
         source_url: clipUrl.value,
         content: extractedContent,
+        tweet_meta: extractedTweetMeta,
       }),
     });
 

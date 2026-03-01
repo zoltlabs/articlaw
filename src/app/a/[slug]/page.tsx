@@ -21,10 +21,10 @@ export async function generateMetadata({
   if (!article) return { title: "Article Not Found" };
 
   return {
-    title: `${article.title} - Articlaw`,
+    title: `${article.title} - Snipclaw`,
     description: article.author
-      ? `By ${article.author} on Articlaw`
-      : "Read on Articlaw",
+      ? `By ${article.author} on Snipclaw`
+      : "Read on Snipclaw",
   };
 }
 

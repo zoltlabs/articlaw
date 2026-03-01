@@ -12,8 +12,8 @@ export async function generateMetadata({
   const { author } = await params;
   const decoded = decodeURIComponent(author);
   return {
-    title: `${decoded} - Articlaw`,
-    description: `Articles by ${decoded} on Articlaw`,
+    title: `${decoded} - Snipclaw`,
+    description: `Articles by ${decoded} on Snipclaw`,
   };
 }
 

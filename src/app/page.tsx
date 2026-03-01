@@ -13,9 +13,14 @@ export default async function Home() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="mb-6 font-serif text-2xl font-bold text-neutral-900 dark:text-neutral-100">
-        Recent Articles
-      </h1>
+      <div className="mb-6">
+        <h1 className="font-serif text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+          Recent Snips
+        </h1>
+        <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+          Snip articles from across the web to share easily.
+        </p>
+      </div>
       {articles && articles.length > 0 ? (
         <div className="space-y-4">
           {articles.map((article) => (
@@ -24,7 +29,7 @@ export default async function Home() {
         </div>
       ) : (
         <p className="text-neutral-500 dark:text-neutral-400">
-          No articles yet. Be the first to{" "}
+          No snips yet. Be the first to{" "}
           <a href="/new" className="text-blue-600 hover:underline dark:text-blue-400">
             create one
           </a>

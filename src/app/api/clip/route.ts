@@ -108,6 +108,72 @@ async function rewriteImages(
   return rewritten;
 }
 
+interface TweetMeta {
+  display_name: string;
+  handle: string;
+  avatar_url: string;
+  timestamp: string;
+  images: string[];
+  text_html: string;
+}
+
+function formatTweetTimestamp(iso: string): string {
+  if (!iso) return "";
+  try {
+    const d = new Date(iso);
+    return d.toLocaleString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  } catch {
+    return iso;
+  }
+}
+
+function buildTweetCard(meta: TweetMeta, sourceUrl?: string): string {
+  const avatarHtml = meta.avatar_url
+    ? `<img src="${meta.avatar_url}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;" alt="${meta.display_name}" />`
+    : `<div style="width:48px;height:48px;border-radius:50%;background:#1d9bf0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px;">${(meta.display_name || "?")[0]}</div>`;
+
+  const xLogoSvg = `<svg viewBox="0 0 24 24" width="20" height="20" fill="#536471" style="margin-left:auto;flex-shrink:0;"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`;
+
+  let imagesHtml = "";
+  if (meta.images && meta.images.length > 0) {
+    const imgTags = meta.images
+      .map(
+        (src) =>
+          `<img src="${src}" style="width:100%;border-radius:12px;margin-top:12px;max-height:500px;object-fit:cover;" alt="Tweet image" />`
+      )
+      .join("");
+    imagesHtml = imgTags;
+  }
+
+  const timestampHtml = meta.timestamp
+    ? `<div style="font-size:14px;color:#536471;margin-top:12px;padding-top:12px;border-top:1px solid #eff3f4;">${formatTweetTimestamp(meta.timestamp)}</div>`
+    : "";
+
+  const linkStart = sourceUrl ? `<a href="${sourceUrl}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit;">` : "";
+  const linkEnd = sourceUrl ? `</a>` : "";
+
+  return `${linkStart}<div style="max-width:550px;margin:16px auto;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;border:1px solid #cfd9de;border-radius:16px;padding:16px;background:#fff;">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+    ${avatarHtml}
+    <div style="flex:1;min-width:0;">
+      <div style="font-weight:700;font-size:15px;color:#0f1419;line-height:1.2;">${meta.display_name || meta.handle}</div>
+      <div style="font-size:14px;color:#536471;">@${meta.handle}</div>
+    </div>
+    ${xLogoSvg}
+  </div>
+  <div style="font-size:17px;line-height:1.5;color:#0f1419;word-wrap:break-word;">${meta.text_html || ""}</div>
+  ${imagesHtml}
+  ${timestampHtml}
+</div>${linkEnd}`;
+}
+
 export async function OPTIONS() {
   return NextResponse.json(null, { headers: corsHeaders });
 }
@@ -146,7 +212,8 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { title, content, source_url, author, content_markdown } = body;
+  const { title, content, source_url, author, content_markdown, tweet_meta } =
+    body;
 
   if (!title || !content) {
     return NextResponse.json(
@@ -157,8 +224,14 @@ export async function POST(request: Request) {
 
   const slug = generateSlug(title);
 
+  // Build styled tweet card HTML when tweet_meta is available
+  let finalContent = content;
+  if (tweet_meta && Array.isArray(tweet_meta) && tweet_meta.length > 0) {
+    finalContent = tweet_meta.map((meta: TweetMeta) => buildTweetCard(meta, source_url)).join("");
+  }
+
   // Download images and rewrite URLs to Supabase Storage
-  const rewrittenContent = await rewriteImages(content, slug, supabase);
+  const rewrittenContent = await rewriteImages(finalContent, slug, supabase);
 
   const { data, error } = await supabase
     .from("articles")

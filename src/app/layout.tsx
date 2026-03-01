@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Articlaw - Clip & Share Articles",
+  title: "Snipclaw - Clip & Share Articles",
   description:
     "Save gated articles, Twitter threads, and paywalled content. Share them via public links.",
 };

@@ -99,7 +99,7 @@ export async function inferAuthor(url: string): Promise<string | null> {
 
   try {
     const res = await fetch(url, {
-      headers: { "User-Agent": "Articlaw/1.0" },
+      headers: { "User-Agent": "Snipclaw/1.0" },
       signal: AbortSignal.timeout(5000),
     });
     const html = await res.text();

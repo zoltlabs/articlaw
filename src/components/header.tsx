@@ -35,7 +35,7 @@ export default function Header() {
           href="/"
           className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100"
         >
-          Articlaw
+          Snipclaw
         </Link>
         <nav className="flex items-center gap-4 text-sm">
           {user ? (

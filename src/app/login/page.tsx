@@ -67,7 +67,7 @@ function LoginForm() {
   return (
     <div className="mx-auto max-w-sm px-4 py-16">
       <h1 className="mb-8 text-center font-serif text-2xl font-bold text-neutral-900 dark:text-neutral-100">
-        {isSignUp ? "Sign up for Articlaw" : "Log in to Articlaw"}
+        {isSignUp ? "Sign up for Snipclaw" : "Log in to Snipclaw"}
       </h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">

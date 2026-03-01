@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Clip to Articlaw",
+  "name": "Clip to Snipclaw",
   "version": "1.0.0",
-  "description": "One-click article clipping to Articlaw",
+  "description": "One-click article clipping to Snipclaw",
   "permissions": ["activeTab", "storage", "scripting", "identity"],
   "action": {
     "default_popup": "popup.html",
