@@ -150,7 +150,8 @@ async function showClipView() {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
     const isXTwitter = /^https?:\/\/(x\.com|twitter\.com)\//i.test(tab.url);
-    const maxAttempts = isXTwitter ? 10 : 1;
+    const isNotion = /^https?:\/\/(.*\.)?notion\.(so|site)\//i.test(tab.url);
+    const maxAttempts = isXTwitter ? 10 : isNotion ? 5 : 1;
     let data = null;
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
@@ -172,14 +173,14 @@ async function showClipView() {
     clipUrl.value = data.source_url || tab.url;
     extractedContent = data.content || "";
 
-    // Show plain-text preview (innerText preserves line breaks from block elements)
-    const tmp = document.createElement("div");
-    tmp.innerHTML = extractedContent;
-    document.body.appendChild(tmp);
-    tmp.style.position = "absolute";
-    tmp.style.visibility = "hidden";
-    const plain = tmp.innerText;
-    tmp.remove();
+    // Show plain-text preview with line breaks preserved
+    const plain = extractedContent
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<\/(p|div|h[1-6]|li|tr)>/gi, "\n")
+      .replace(/<(hr)\s*\/?>/gi, "\n---\n")
+      .replace(/<[^>]+>/g, "")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
     clipPreview.textContent = plain.slice(0, 500) + (plain.length > 500 ? "..." : "");
 
     extractingView.style.display = "none";
