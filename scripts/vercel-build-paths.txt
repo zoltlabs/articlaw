@@ -1,0 +1,11 @@
+.mcp.json
+eslint.config.mjs
+next.config.ts
+package-lock.json
+package.json
+postcss.config.mjs
+public
+scripts
+src
+tsconfig.json
+vercel.json
